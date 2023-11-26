@@ -2,7 +2,7 @@
 
 if [ $# -ne 2 ]
 then
-    echo "error there is missing arguments"
+    #echo "error there is missing arguments"
     return 1
 fi
 
