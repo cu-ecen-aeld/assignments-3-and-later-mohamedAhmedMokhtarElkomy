@@ -5,8 +5,6 @@ int main(int argc, char **argv){
 
     openlog("", LOG_PID, LOG_USER);
 
-    printf("args size = %d", argc);
-
     if(argc < 3){
         syslog(LOG_ERR, "String argument not found");
         closelog();
