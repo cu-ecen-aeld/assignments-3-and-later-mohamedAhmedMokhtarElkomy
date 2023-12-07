@@ -1,5 +1,10 @@
 #include "systemcalls.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 /**
  * @param cmd the command to execute with system()
  * @return true if the command in @param cmd was executed
@@ -17,7 +22,14 @@ bool do_system(const char *cmd)
  *   or false() if it returned a failure
 */
 
-    return true;
+    int isExecuted = system(cmd);
+
+    if(isExecuted != 0){
+        printf("Error: Failed to execute system(cmd)\n");
+        return false;
+    }
+    else
+        return true;
 }
 
 /**
@@ -59,6 +71,39 @@ bool do_exec(int count, ...)
  *
 */
 
+    fflush(stdout);
+    // pid_t is signed integer data type
+    // it allow you to get pid by pid function
+    pid_t pid = fork();
+
+    if (pid < 0)
+    {
+        printf("Error: Failed to fork\n");
+        return false;
+    }
+    else if(pid == 0)
+    {
+        execv(command[0], command); /* takes the path of the command at command[0], and takes a list of commands in second argument */
+        printf("Error: Failed to execv(command[0], command)");
+        // return false;
+        exit(1);
+    }
+    else{
+
+        int status;
+        if(waitpid(pid, &status, 0) == -1)
+        {
+            printf("Error: Failed to wait for pid: %d\n", pid);
+            return false;
+        }
+
+        if(status != 0){
+            printf("Error: failure in status of waitpid--- pid: %d\t status: %d\n", pid, status);
+            return false;
+        }
+    }
+    
+
     va_end(args);
 
     return true;
@@ -92,6 +137,40 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+
+    fflush(stdout);
+    pid_t pid = fork();
+
+    if (pid < 0)
+    {
+        return false;
+    }
+    else if(pid == 0)
+    {
+        int output_file = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+        if (output_file < 0)
+            return false;
+        
+        if (dup2(output_file, 1) <= 0)
+        {
+            return false;
+        }
+
+        close(output_file);
+        execv(command[0], command); /* takes the path of the command at command[0], and takes a list of commands in second argument */
+
+        // return false;
+        exit(1);
+    }
+    else{
+
+        int status;
+        waitpid(pid, &status, 0);
+
+
+        if(status != 0)
+            return false;
+    }
 
     va_end(args);
 
