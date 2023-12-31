@@ -44,6 +44,7 @@ if [ ! -e linux-stable/arch/${ARCH}/boot/Image ]; then
 fi
 
 echo "Adding the Image in outdir"
+cp ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ${OUTDIR}
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
@@ -67,6 +68,7 @@ then
 git clone git://busybox.net/busybox.git
     cd busybox
     git checkout ${BUSYBOX_VERSION} 
+
 else
     cd busybox
 fi
@@ -75,54 +77,48 @@ fi
 # TODO: Make and install busybox
 make distclean  # It goes silence in case of already cleaned direc.
 make defconfig  # default configuration for arm64 
-make j=10 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE   # builds the busybox executable!
-make j=10 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE CONFIG_PREFIX=${OUTDIR}/rootfs install # Adds all the program bin to the rootfs/bin as hard links
+make -j17 CONFIG_PREFIX="${OUTDIR}/rootfs" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
-# echo "Library dependencies"
-${CROSS_COMPILE}readelf -a busybox | grep "program interpreter"
-${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
+echo "Library dependencies"
+${CROSS_COMPILE}readelf -a "${OUTDIR}/rootfs/"bin/busybox | grep "program interpreter"
+${CROSS_COMPILE}readelf -a "${OUTDIR}/rootfs/"bin/busybox | grep "Shared library"
 
-popd
-# TODO: Add library dependencies to rootfs
-cp -a ${C_LIB}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib
-cp -a ${C_LIB}/lib64/ld-2.31.so ${OUTDIR}/rootfs/lib64
+# Add library dependencies to rootfs
+SYSROOT=$(${CROSS_COMPILE}gcc -print-sysroot)
 
-cp -a ${C_LIB}/lib64/libc.so.6 ${OUTDIR}/rootfs/lib64
-cp -a ${C_LIB}/lib64/libc-2.31.so ${OUTDIR}/rootfs/lib64
+cp "${SYSROOT}/lib/ld-linux-aarch64.so.1" "${OUTDIR}/rootfs/lib"
 
-cp -a ${C_LIB}/lib64/libresolv.so.2 ${OUTDIR}/rootfs/lib64
-cp -a ${C_LIB}/lib64/libresolv-2.31.so ${OUTDIR}/rootfs/lib64
+cp "${SYSROOT}/lib64/libm.so.6" "${OUTDIR}/rootfs/lib64"
+cp "${SYSROOT}/lib64/libresolv.so.2" "${OUTDIR}/rootfs/lib64"
+cp "${SYSROOT}/lib64/libc.so.6" "${OUTDIR}/rootfs/lib64"
 
-cp -a ${C_LIB}/lib64/libm.so.6 ${OUTDIR}/rootfs/lib64
-cp -a ${C_LIB}/lib64/libm-2.31.so ${OUTDIR}/rootfs/lib64
+# Make device nodes
 
-# TODO: Clean and build the writer utility
-if [ ! -e writer ]; then # if the writer app does not exist!
-    make CROSS_COMPILE=${CROSS_COMPILE} all
-else
-    make clean
-    make CROSS_COMPILE=${CROSS_COMPILE} all
-fi
+cd "${OUTDIR}/rootfs"
+sudo mknod -m 666 dev/null c 1 3
+sudo mknod -m 600 dev/console c 5 1
 
-# TODO: Copy the finder related scripts and executables to the /home directory
+# Clean and build the writer utility
+
+cd ${FINDER_APP_DIR}
+make clean
+make CROSS_COMPILE=${CROSS_COMPILE}
+
+# Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-cp writer ${OUTDIR}/rootfs/home
-cp finder-test.sh ${OUTDIR}/rootfs/home
-cp finder.sh ${OUTDIR}/rootfs/home
-cp conf/assignment.txt ${OUTDIR}/rootfs/home/conf
-cp conf/username.txt ${OUTDIR}/rootfs/home/conf
-cp autorun-qemu.sh ${OUTDIR}/rootfs/home
 
-# TODO: Make device nodes
-if [ ! -e ${OUTDIR}/rootfs/dev/console ]; then  # if the file does not exist!
-    sudo mknod -m 600 ${OUTDIR}/rootfs/dev/console c 5 1 # character devices creation
-fi
-if [ ! -e ${OUTDIR}/rootfs/dev/null ]; then
-    sudo mknod -m 666 ${OUTDIR}/rootfs/dev/null c 1 3
-fi
+cp writer "${OUTDIR}/rootfs/home"
+cp finder*.sh "${OUTDIR}/rootfs/home"
+cp -r ../conf "${OUTDIR}/rootfs/home"
+cp autorun-qemu.sh "${OUTDIR}/rootfs/home"
 
-# TODO: Chown the root directory
-# TODO: Create initramfs.cpio.gz
-cd ${OUTDIR}/rootfs
-find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio 
-gzip -f ${OUTDIR}/initramfs.cpio
+# Chown the root directory
+
+cd "${OUTDIR}/rootfs/"
+sudo chown -R root:root *
+
+# Create initramfs.cpio.gz
+
+find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
+cd ${OUTDIR}
+gzip -f initramfs.cpio

@@ -3,7 +3,7 @@
 if [ $# -ne 2 ]
 then
     echo "error there is missing arguments"
-    return 1
+    exit 1
 fi
 
 writefile=$1

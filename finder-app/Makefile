@@ -14,4 +14,4 @@ all:
 	$(CC) -o $(DIR)writer $(DIR)writer.c
 
 clean:
-	rm $(DIR)writer 
+	rm -f *.o writer 
