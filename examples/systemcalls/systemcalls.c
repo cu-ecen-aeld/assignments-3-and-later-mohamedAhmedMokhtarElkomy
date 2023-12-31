@@ -85,8 +85,8 @@ bool do_exec(int count, ...)
     {
         execv(command[0], command); /* takes the path of the command at command[0], and takes a list of commands in second argument */
         printf("Error: Failed to execv(command[0], command)");
-        // return false;
-        exit(1);
+        return false;
+        // exit(1);
     }
     else{
 
@@ -159,8 +159,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         close(output_file);
         execv(command[0], command); /* takes the path of the command at command[0], and takes a list of commands in second argument */
 
-        // return false;
-        exit(1);
+        return false;
+        // exit(1);
     }
     else{
 

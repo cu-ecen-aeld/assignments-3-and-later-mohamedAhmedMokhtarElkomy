@@ -1,13 +1,17 @@
-CC = gcc
-file = writer.c
+DIR=
 
-ifdef CROSS_COMPILER
-	compile = $(CROSS_COMPILER)$(CC)
+ifeq ($(CROSS_COMPILE), aarch64-linux-gnu-)
+	CC=aarch64-linux-gnu-gcc
+else
+	CC=gcc
 endif
 
-default: writer.c 				#The prerequisites are also file names, separated by spaces. These files need to exist before the commands for the target are run. These are also called dependencies
-	$(CC) $(file) -o writer
+
+.phony:	clean
+.phony:	all
+
+all:
+	$(CC) -o $(DIR)writer $(DIR)writer.c
 
 clean:
-	# rm *.o
-	rm writer
+	rm $(DIR)writer 
