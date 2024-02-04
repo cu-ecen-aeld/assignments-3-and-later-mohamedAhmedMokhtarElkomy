@@ -13,7 +13,7 @@ BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 # CROSS_COMPILE=aarch64-linux-gnu-
-CROSS_COMPILE=aarch64-none-linux-gnu-
+CROSS_COMPILE=aarch64-linux-gnu-
 
 if [ $# -lt 1 ]
 then
@@ -44,6 +44,8 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 fi
 
 echo "Adding the Image in outdir"
+install ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ${OUTDIR}/
+
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
@@ -56,9 +58,9 @@ fi
 # TODO: Create necessary base directories
 mkdir -p ${OUTDIR}/rootfs
 cd ${OUTDIR}/rootfs
-sudo mkdir -p bin dev etc home lib lib64 sbin sys tmp usr var
-sudo mkdir -p usr/bin/ usr/lib usr/sbin
-sudo mkdir -p var/log
+mkdir -p bin dev etc home lib lib64 sbin sys tmp usr var
+mkdir -p usr/bin/ usr/lib usr/sbin
+mkdir -p var/log
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
@@ -74,13 +76,14 @@ else
 fi
 
 # TODO: Make and install busybox
-export PATH=/home/nitin/Downloads/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin:$PATH
+# sudo export PATH=~/Downloads/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin:$PATH
+export PATH=~/Downloads/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin:$PATH
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 make CONFIG_PREFIX="${OUTDIR}/rootfs" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 echo "Library dependencies"
-${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
-${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
+# ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
+# ${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
 
 # TODO: Make device nodes
 cd ${OUTDIR}/rootfs
@@ -102,7 +105,7 @@ cp ${FINDER_APP_DIR}/conf/* ${OUTDIR}/rootfs/home/conf/
 cp ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home/
 
 # TODO: Chown the root directory
-chown -R root:root ${OUTDIR}/rootfs
+sudo chown -R root:root ${OUTDIR}/rootfs
 
 # TODO: Create initramfs.cpio.gz
 cd ${OUTDIR}/rootfs
