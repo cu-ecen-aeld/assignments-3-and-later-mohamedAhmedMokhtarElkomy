@@ -1,4 +1,4 @@
-#!/bin/bash
+# !/bin/sh
 # Script outline to install and build kernel.
 # Author: Siddhant Jajoo.
 
@@ -14,6 +14,7 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 # CROSS_COMPILE=aarch64-linux-gnu-
 CROSS_COMPILE=aarch64-linux-gnu-
+TOOLCHAIN_SYSROOT=$(${CROSS_COMPILE}gcc -print-sysroot)
 
 if [ $# -lt 1 ]
 then
@@ -69,21 +70,27 @@ git clone git://busybox.net/busybox.git
     cd busybox
     git checkout ${BUSYBOX_VERSION}
     # TODO:  Configure busybox
-    make distclean
-    make defconfig
 else
     cd busybox
 fi
 
 # TODO: Make and install busybox
-# sudo export PATH=~/Downloads/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin:$PATH
+make distclean
+make defconfig
 export PATH=~/Downloads/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin:$PATH
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make -j ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 make CONFIG_PREFIX="${OUTDIR}/rootfs" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 echo "Library dependencies"
-# ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
-# ${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
+${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "program interpreter"
+${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "Shared library"
+
+# Add library dependencies to rootfs
+cp ${TOOLCHAIN_SYSROOT}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-aarch64.so.1
+cp ${TOOLCHAIN_SYSROOT}/lib64/libm.so.6 ${OUTDIR}/rootfs/lib64/libm.so.6
+cp ${TOOLCHAIN_SYSROOT}/lib64/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
+cp ${TOOLCHAIN_SYSROOT}/lib64/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
+
 
 # TODO: Make device nodes
 cd ${OUTDIR}/rootfs
@@ -103,6 +110,13 @@ cp ${FINDER_APP_DIR}/finder-test.sh ${OUTDIR}/rootfs/home/
 mkdir ${OUTDIR}/rootfs/home/conf
 cp ${FINDER_APP_DIR}/conf/* ${OUTDIR}/rootfs/home/conf/
 cp ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home/
+
+# install ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/home
+# install ${FINDER_APP_DIR}/finder.sh ${OUTDIR}/rootfs/home
+# install -d ${OUTDIR}/rootfs/home/conf
+# install -m 644 -t ${OUTDIR}/rootfs/home/conf ${FINDER_APP_DIR}/conf/assignment.txt ${FINDER_APP_DIR}/conf/username.txt
+# install ${FINDER_APP_DIR}/finder-test.sh ${OUTDIR}/rootfs/home
+# install ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home
 
 # TODO: Chown the root directory
 sudo chown -R root:root ${OUTDIR}/rootfs
