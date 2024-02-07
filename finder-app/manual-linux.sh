@@ -104,8 +104,9 @@ make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/home/
-cp ${FINDER_APP_DIR}/finder.sh ${OUTDIR}/rootfs/home/
+# cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/home/
+cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/usr/bin
+cp ${FINDER_APP_DIR}/finder.sh ${OUTDIR}/rootfs/usr/bin
 cp ${FINDER_APP_DIR}/finder-test.sh ${OUTDIR}/rootfs/home/
 mkdir ${OUTDIR}/rootfs/home/conf
 cp ${FINDER_APP_DIR}/conf/* ${OUTDIR}/rootfs/home/conf/
@@ -125,3 +126,4 @@ sudo chown -R root:root ${OUTDIR}/rootfs
 cd ${OUTDIR}/rootfs
 find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
 gzip -f ${OUTDIR}/initramfs.cpio
+
