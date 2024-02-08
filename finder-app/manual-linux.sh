@@ -86,10 +86,16 @@ ${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "Shared library"
 
 # Add library dependencies to rootfs
-cp ${TOOLCHAIN_SYSROOT}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-aarch64.so.1
-cp ${TOOLCHAIN_SYSROOT}/lib64/libm.so.6 ${OUTDIR}/rootfs/lib64/libm.so.6
-cp ${TOOLCHAIN_SYSROOT}/lib64/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
-cp ${TOOLCHAIN_SYSROOT}/lib64/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
+# cp ${TOOLCHAIN_SYSROOT}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-aarch64.so.1
+# cp ${TOOLCHAIN_SYSROOT}/lib64/libm.so.6 ${OUTDIR}/rootfs/lib64/libm.so.6
+# cp ${TOOLCHAIN_SYSROOT}/lib64/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
+# cp ${TOOLCHAIN_SYSROOT}/lib64/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
+
+cp ${FINDER_APP_DIR}/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-aarch64.so.1
+cp ${FINDER_APP_DIR}/libm.so.6 ${OUTDIR}/rootfs/lib64/libm.so.6
+cp ${FINDER_APP_DIR}/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
+cp ${FINDER_APP_DIR}/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
+
 
 # TODO: Make device nodes
 cd ${OUTDIR}/rootfs
