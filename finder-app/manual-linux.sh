@@ -13,7 +13,7 @@ BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 # CROSS_COMPILE=aarch64-linux-gnu-
-CROSS_COMPILE=aarch64-linux-gnu-
+CROSS_COMPILE=aarch64-none-linux-gnu-
 TOOLCHAIN_SYSROOT=$(${CROSS_COMPILE}gcc -print-sysroot)
 
 if [ $# -lt 1 ]
@@ -77,7 +77,7 @@ fi
 # TODO: Make and install busybox
 make distclean
 make defconfig
-export PATH=~/Downloads/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin:$PATH
+export PATH=$PATH:/home/tata/Downloads/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin
 make -j ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 make CONFIG_PREFIX="${OUTDIR}/rootfs" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
@@ -90,7 +90,6 @@ cp ${TOOLCHAIN_SYSROOT}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-
 cp ${TOOLCHAIN_SYSROOT}/lib64/libm.so.6 ${OUTDIR}/rootfs/lib64/libm.so.6
 cp ${TOOLCHAIN_SYSROOT}/lib64/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
 cp ${TOOLCHAIN_SYSROOT}/lib64/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
-
 
 # TODO: Make device nodes
 cd ${OUTDIR}/rootfs

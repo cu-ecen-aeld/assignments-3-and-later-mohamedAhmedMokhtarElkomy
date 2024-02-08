@@ -2,7 +2,7 @@ CC = gcc
 file = writer.c
 
 
-CROSS_COMPILER=aarch64-linux-gnu-
+CROSS_COMPILER=aarch64-none-linux-gnu-
 
 ifdef CROSS_COMPILER
 	compile = $(CROSS_COMPILER)$(CC)
