@@ -5,6 +5,8 @@
 set -e
 set -u
 
+whoami
+
 OUTDIR=/tmp/aeld
 # OUTDIR=~/Downloads/aeld
 KERNEL_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
