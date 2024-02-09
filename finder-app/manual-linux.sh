@@ -83,8 +83,8 @@ make CONFIG_PREFIX="${OUTDIR}/rootfs" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE
 
 echo "Library dependencies"
 
-${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "program interpreter"
-${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "Shared library"
+# ${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "program interpreter"
+# ${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "Shared library"
 
 # Add library dependencies to rootfs
 # cp ${TOOLCHAIN_SYSROOT}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-aarch64.so.1
