@@ -37,11 +37,11 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     echo "Checking out version ${KERNEL_VERSION}"
     git checkout ${KERNEL_VERSION}
 
-    # TODO: Add your kernel build steps here
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
+    echo "TODO: Add your kernel build steps here"s
+    make -j4 ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
+    make -j4 ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
     make -j4 ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} all
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} dtbs
+    make -j4 ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} dtbs
 fi
 
 echo "Adding the Image in outdir"
@@ -56,7 +56,7 @@ then
     sudo rm  -rf ${OUTDIR}/rootfs
 fi
 
-# TODO: Create necessary base directories
+echo "TODO: Create necessary base directories"
 mkdir -p ${OUTDIR}/rootfs
 cd ${OUTDIR}/rootfs
 mkdir -p bin dev etc home lib lib64 sbin sys tmp usr var
@@ -69,12 +69,12 @@ then
 git clone git://busybox.net/busybox.git
     cd busybox
     git checkout ${BUSYBOX_VERSION}
-    # TODO:  Configure busybox
+    echo "TODO:  Configure busybox"
 else
     cd busybox
 fi
 
-# TODO: Make and install busybox
+echo "TODO: Make and install busybox"
 make distclean
 make defconfig
 export PATH=$PATH:/home/tata/Downloads/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin
@@ -98,17 +98,17 @@ cp ${FINDER_APP_DIR}/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
 cp ${FINDER_APP_DIR}/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
 
 
-# TODO: Make device nodes
+echo "TODO: Make device nodes"
 cd ${OUTDIR}/rootfs
 sudo mknod -m 666 dev/null c 1 3
 sudo mknod -m 666 dev/console c 5 1
 
-# TODO: Clean and build the writer utility
+echo "TODO: Clean and build the writer utility"
 cd ${FINDER_APP_DIR}
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} clean
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 
-# TODO: Copy the finder related scripts and executables to the /home directory
+echo "TODO: Copy the finder related scripts and executables to the /home directory"
 # on the target rootfs
 # cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/home/
 cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/usr/bin
@@ -125,10 +125,10 @@ cp ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home/
 # install ${FINDER_APP_DIR}/finder-test.sh ${OUTDIR}/rootfs/home
 # install ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home
 
-# TODO: Chown the root directory
+echo "TODO: Chown the root directory"
 sudo chown -R root:root ${OUTDIR}/rootfs
 
-# TODO: Create initramfs.cpio.gz
+echo "TODO: Create initramfs.cpio.gz"
 cd ${OUTDIR}/rootfs
 find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
 gzip -f ${OUTDIR}/initramfs.cpio
