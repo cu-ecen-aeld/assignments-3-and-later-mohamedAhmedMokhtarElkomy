@@ -82,6 +82,11 @@ make -j ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 make CONFIG_PREFIX="${OUTDIR}/rootfs" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 echo "Library dependencies"
+echo ${CROSS_COMPILE}readelf
+ls  /usr
+ls  /usr/bin
+ls  /usr/bin/busybox
+
 ${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a /usr/bin/busybox | grep "Shared library"
 
