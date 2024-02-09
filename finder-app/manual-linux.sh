@@ -2,7 +2,7 @@
 # Script outline to install and build kernel.
 # Author: Siddhant Jajoo.
 
-set -e
+# set -e
 set -u
 
 OUTDIR=/tmp/aeld
@@ -99,18 +99,22 @@ cp ${FINDER_APP_DIR}/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
 
 
 # TODO: Make device nodes
+echo "script: Make device nodes"
 cd ${OUTDIR}/rootfs
 sudo mknod -m 666 dev/null c 1 3
 sudo mknod -m 666 dev/console c 5 1
 
 # TODO: Clean and build the writer utility
+echo "script: clean and build writer"
 cd ${FINDER_APP_DIR}
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} clean
+# make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} clean
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+
 
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
 # cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/home/
+echo "script: Copy finder related scripts"
 cp ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/usr/bin
 cp ${FINDER_APP_DIR}/finder.sh ${OUTDIR}/rootfs/usr/bin
 cp ${FINDER_APP_DIR}/finder-test.sh ${OUTDIR}/rootfs/home/
@@ -126,6 +130,7 @@ cp ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home/
 # install ${FINDER_APP_DIR}/autorun-qemu.sh ${OUTDIR}/rootfs/home
 
 # TODO: Chown the root directory
+echo "Chown the root dir"
 sudo chown -R root:root ${OUTDIR}/rootfs
 
 # TODO: Create initramfs.cpio.gz
