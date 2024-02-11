@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+
 
 // Optional: use these functions to add debug or error prints to your application
 #define DEBUG_LOG(msg,...)
@@ -13,8 +16,32 @@ void* threadfunc(void* thread_param)
 
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
-    //struct thread_data* thread_func_args = (struct thread_data *) thread_param;
-    return thread_param;
+    
+    struct thread_data* thread_func_args = (struct thread_data *) thread_param;
+
+    usleep(thread_func_args->wait_to_obtain_ms * 1000);
+    
+    if( pthread_mutex_lock(thread_func_args->mutex) == 0 ){
+    
+        usleep(thread_func_args->wait_to_release_ms * 1000);
+    
+        if( pthread_mutex_unlock(thread_func_args->mutex) != 0 ){
+            thread_func_args->thread_complete_success = false;
+            // ERROR_LOG( "Thread with ID: %d failed to unlock mutex, %d", pthread_self, strerror(errno) );
+        }
+        else
+            thread_func_args->thread_complete_success = true;
+            
+    }
+    else{
+        thread_func_args->thread_complete_success = false;
+        // ERROR_LOG( "Thread with ID: %d failed to lock mutex, %d", pthread_self, strerror(errno) );
+        
+    }
+        
+    
+
+    return thread_func_args;
 }
 
 
@@ -28,6 +55,20 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      *
      * See implementation details in threading.h file comment block
      */
+
+    struct thread_data *data = malloc(sizeof(struct thread_data));
+    
+    data->mutex = mutex;
+    data->wait_to_obtain_ms = wait_to_obtain_ms;
+    data->wait_to_release_ms = wait_to_release_ms;
+    data->thread_complete_success = false;
+    
+    if( pthread_create(thread, NULL, &threadfunc, (void *)data) == 0 ){
+        DEBUG_LOG("Thread with ID: %d started successfully", *thread);
+        return true;
+    }
+    else
+        // ERROR_LOG( "Thread with ID: %d failed to start, %d", *thread, strerror(errno) );
     return false;
 }
 
